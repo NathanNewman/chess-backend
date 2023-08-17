@@ -23,5 +23,5 @@
     }
   },
   "additionalProperties": false,
-  "required": ["username", "result", "elo", "moves"]
+  "required": ["username", "result", "elo", "moves", "userColor"]
 }

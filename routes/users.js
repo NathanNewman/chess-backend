@@ -55,7 +55,6 @@ router.get("/leaderboard", ensureLoggedIn, async function (req,res, next) {
 
 router.get("/:username", ensureLoggedIn, async function (req, res, next) {
   try {
-    console.log(req.params.username);
     const user = await User.get(req.params.username);
     return res.json({ user });
   } catch (err) {

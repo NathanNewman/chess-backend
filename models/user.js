@@ -12,7 +12,7 @@ const {
 const { BCRYPT_WORK_FACTOR } = require("../config.js");
 
 class User {
-  static async register({ username, password, imageURL }) {
+  static async register({ username, password }) {
     const duplicateCheck = await db.query(
       `SELECT username
              FROM users
@@ -30,11 +30,10 @@ class User {
       `INSERT INTO users
              (username,
               password,
-              image_url,
               elo)
-             VALUES ($1, $2, $3, $4)
-             RETURNING username, image_url AS "imageURL", elo`,
-      [username, hashedPassword, imageURL, elo]
+             VALUES ($1, $2, $3)
+             RETURNING username, elo`,
+      [username, hashedPassword, elo]
     );
 
     const user = result.rows[0];
@@ -45,7 +44,7 @@ class User {
   static async authenticate(username, password) {
     // try to find the user first
     const result = await db.query(
-      `SELECT username, password, image_url AS "imageURL", elo     
+      `SELECT username, password, elo     
                FROM users
                WHERE username = $1`,
       [username]
@@ -67,9 +66,7 @@ class User {
 
   static async get(username) {
     const userRes = await db.query(
-      `SELECT username,
-                  image_url AS "imageURL",
-                  elo
+      `SELECT username, elo
            FROM users
            WHERE username = $1`,
       [username]
@@ -96,7 +93,6 @@ class User {
     }
 
     const { setCols, values } = sqlForPartialUpdate(data, {
-      imageURL: "image_url",
       elo: "elo",
     });
     const usernameVarIdx = "$" + (values.length + 1);
@@ -105,7 +101,6 @@ class User {
                       SET ${setCols} 
                       WHERE username = ${usernameVarIdx} 
                       RETURNING username,
-                                image_url AS "imageURL",
                                 elo`;
     const result = await db.query(querySql, [...values, username]);
     const user = result.rows[0];
@@ -117,39 +112,22 @@ class User {
   }
 
   static async remove(username) {
-    let res = await db.query(
-      `SELECT id
-          FROM matches
-          WHERE username = $1`,
-      [username]
-    );
-    const matchIds = res.rows;
-    for (let matchId of matchIds) {
-      await db.query(
-        `DELETE
-          FROM moves
-          WHERE match_id = $1`,
-        [matchId]
+    try {
+      const result = await db.query(
+        `DELETE FROM users WHERE username = $1 RETURNING username`,
+        [username]
       );
+  
+      const deletedUser = result.rows[0];
+      if (!deletedUser) {
+        throw new NotFoundError(`No user: ${username}`);
+      }
+  
+      return deletedUser.username;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
     }
-    for (let matchId of matchIds) {
-      await db.query(
-        `DELETE
-          FROM matches
-          WHERE id = $1`,
-        [matchId]
-      );
-    }
-    let result = await db.query(
-      `DELETE
-           FROM users
-           WHERE username = $1
-           RETURNING username`,
-      [username]
-    );
-    const user = result.rows[0];
-
-    if (!user) throw new NotFoundError(`No user: ${username}`);
   }
 }
 

@@ -5,10 +5,10 @@ const User = require("./user");
 const updateElo = require("../helpers/elo");
 
 class Match {
-  static async record(username, result, elo, moves) {
+  static async record(username, result, elo, moves, userColor) {
     try {
       const user = await this.updateUserElo(username, elo, result);
-      const match = await this.insertMatch(username, result);
+      const match = await this.insertMatch(username, result, userColor);
       await this.insertMoves(match.id, moves);
       return user;
     } catch (error) {
@@ -56,15 +56,21 @@ class Match {
     }
   }
   static async replay(matchId) {
+      const moves = await this.getMoves(matchId);
+      const match = await this.getMatch(matchId);
+      match.moves = moves;
+      return match;
+  }
+  static async getMoves(matchId) {
     try {
-      const result = await db.query(
+      const moves = await db.query(
         `SELECT notation
             FROM moves
             WHERE match_id = $1
-            ORDER BY move_order DESC`,
+            ORDER BY move_order`,
         [matchId]
       );
-      return result.rows;
+      return moves.rows;
     } catch (error) {
       console.error("Match.replay:", error.message);
     }
@@ -81,6 +87,36 @@ class Match {
     } catch (error) {
       console.error("Match.matches:", error.message);
     }
+  }
+  static async getMatch(matchId) {
+    try {
+      const result = await db.query(
+        `SELECT *
+            FROM matches
+            WHERE id = $1`,
+        [matchId]
+      );
+      return result.rows[0];
+    } catch (error) {
+      console.error("Match.matches:", error.message);
+    }
+  }
+  static async winLoss(username) {
+    const matches = await this.matches(username);
+    let win = 0;
+    let loss = 0;
+    let tie = 0;
+    for(let match of matches) {
+      const [condition, result] = match.result.split(" ");
+      if(condition === "draw") {
+        tie++;
+      } else if(result === "win") {
+        win++;
+      } else {
+        loss++;
+      }
+    }
+    return win.toString() + "-" + loss.toString() + "-" + tie.toString();
   }
 }
 

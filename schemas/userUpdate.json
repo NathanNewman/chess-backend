@@ -12,9 +12,6 @@
       "type": "string",
       "minLength": 8,
       "maxLength": 20
-    },
-    "imageURL": {
-      "type": "string"
     }
   },
   "additionalProperties": false,

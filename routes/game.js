@@ -28,8 +28,8 @@ router.get("/replay/:matchId", ensureLoggedIn, async function (req, res, next) {
   const { matchId } = req.params;
 
   try {
-    const moves = await Match.replay(matchId);
-    return res.status(200).json({ moves });
+    const match = await Match.replay(matchId);
+    return res.status(200).json({ match });
   } catch (error) {
     return next(error);
   }
@@ -41,6 +41,17 @@ router.get("/matches/:username", ensureLoggedIn, async function(req, res, next) 
   try {
     const matches = await Match.matches(username);
     return res.status(200).json({ matches });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/win-loss/:username", ensureLoggedIn, async function(req, res, next) {
+  const { username } = req.params;
+
+  try {
+    const result = await Match.winLoss(username);
+    return res.status(200).json({ result });
   } catch (error) {
     return next(error);
   }
