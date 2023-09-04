@@ -8,7 +8,7 @@ require("colors");
 const SECRET_KEY = process.env.SECRET_KEY || "secret-dev";
 
 const PORT = +process.env.PORT || 3001;
-const URL = 'postgres:///chess';
+const URL = 'postgres://gvslbpov:fCp2gkRuLUlTch79OJeUU_CRZQWatR_h@mahmud.db.elephantsql.com/gvslbpov';
 
 // Use dev database, testing database, or via env var, production database
 function getDatabaseUri() {
