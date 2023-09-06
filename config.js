@@ -5,17 +5,9 @@
 require("dotenv").config();
 require("colors");
 
-const SECRET_KEY = process.env.SECRET_KEY || "";
+const SECRET_KEY = process.env.SECRET_KEY;
 
 const PORT = +process.env.PORT || 3001;
-const URL = 'postgres://prxzgwvg:fy5DAec4J-pMOQRwh5jzsJDeMjxMgECK@bubble.db.elephantsql.com/prxzgwvg';
-
-// Use dev database, testing database, or via env var, production database
-// function getDatabaseUri() {
-//   return (process.env.NODE_ENV === "production")
-//       ? DATABASE_URL
-//       : URL
-// }
 
 function getDatabaseUri() {
   return (process.env.NODE_ENV === "production")
