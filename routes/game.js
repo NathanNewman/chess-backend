@@ -11,6 +11,7 @@ const router = express.Router();
 
 router.post("/record", ensureLoggedIn, async function (req, res, next) {
   const { username, result, elo, moves, userColor } = req.body;
+  console.log(req.body);
   try {
     const validator = jsonschema.validate(req.body, gameRecordSchema);
     if (!validator.valid) {
@@ -18,7 +19,7 @@ router.post("/record", ensureLoggedIn, async function (req, res, next) {
       throw new BadRequestError(errs);
     }
     const user = await Match.record(username, result, parseInt(elo), moves, userColor);
-    return res.status(200).json({ user });
+    return res.status(201).json({ user });
   } catch (error) {
     return next(error);
   }

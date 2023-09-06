@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === "production") {
 } else {
   db = new Client({
     connectionString: getDatabaseUri()
+    // connectionString: process.env.DATABASE_URL || 'postgres://username:password@localhost:5432/chess'
     // database:'chess', host:'localhost', port:5432, password:'Valvenis'
   });
 }

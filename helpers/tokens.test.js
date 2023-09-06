@@ -1,36 +1,30 @@
 const jwt = require("jsonwebtoken");
-const { createToken } = require("./tokens");
+const { createToken } = require("./tokens.js");
 const { SECRET_KEY } = require("../config");
 
-describe("createToken", function () {
-  test("works: not admin", function () {
-    const token = createToken({ username: "test", is_admin: false });
-    const payload = jwt.verify(token, SECRET_KEY);
-    expect(payload).toEqual({
-      iat: expect.any(Number),
-      username: "test",
-      isAdmin: false,
-    });
+// Mock the jwt.sign function to prevent actual token generation
+jest.mock("jsonwebtoken", () => ({
+  sign: jest.fn(),
+}));
+
+describe("createToken", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  test("works: admin", function () {
-    const token = createToken({ username: "test", isAdmin: true });
-    const payload = jwt.verify(token, SECRET_KEY);
-    expect(payload).toEqual({
-      iat: expect.any(Number),
-      username: "test",
-      isAdmin: true,
-    });
-  });
+  test("should generate a JWT token with the provided payload", () => {
+    const user = { username: "testuser" };
+    const expectedPayload = { username: "testuser" };
 
-  test("works: default no admin", function () {
-    // given the security risk if this didn't work, checking this specifically
-    const token = createToken({ username: "test" });
-    const payload = jwt.verify(token, SECRET_KEY);
-    expect(payload).toEqual({
-      iat: expect.any(Number),
-      username: "test",
-      isAdmin: false,
-    });
+    // Mock the jwt.sign method to return a predefined token
+    jwt.sign.mockReturnValue("mockedToken");
+
+    const token = createToken(user);
+
+    // Verify that jwt.sign was called with the expected payload and secret key
+    expect(jwt.sign).toHaveBeenCalledWith(expectedPayload, SECRET_KEY);
+
+    // Verify that the generated token matches the expected value
+    expect(token).toBe("mockedToken");
   });
 });

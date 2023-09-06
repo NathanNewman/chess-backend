@@ -38,7 +38,6 @@ function updateElo(elo, result) {
       return elo - 25;
     }
   }
-  
 }
 
 module.exports = updateElo;
